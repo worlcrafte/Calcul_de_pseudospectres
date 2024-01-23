@@ -13,9 +13,14 @@
 \usepackage{pstricks-add}
 \usepackage{eurosym}
 \usepackage{pgf,tikz,pgfplots}
-\pgfplotsset{compat=1.15}
+\usepackage{hyperref}
 \usepackage{mathrsfs}
+\pgfplotsset{compat=1.15}
 \usetikzlibrary{arrows}
+
+\renewcommand{\listfigurename}{List of plots}
+\renewcommand{\listtablename}{Tables}
+
 
 \begin{document}
 
@@ -25,7 +30,7 @@
     \vspace*{7cm}
     
     \begin{center}
-        \textbf{\Large{Projet Algo} }\\
+        \textbf{\Large{Projet CCA} }\\
         \vspace*{1 cm}
     \Huge{\textbf{ Calcul de pseudospectres}}\\
     \end{center}
@@ -39,8 +44,17 @@
     \large{\today}
   \end{center}
 
-  
 
+  \newpage
+  \tableofcontents
+  \listoffigures
+
+  \clearpage
+  \pagenumbering{arabic}
+
+  \section{Understanding the problem}
+  \url{https://www.math.univ-toulouse.fr/~jroyer/TD/2013-14-Projet-L3/Projet-Blohorn-Boquen-Dubois.pdf}
+  \url{http://www.numdam.org/article/SEDP_2006-2007____A15_0.pdf}
 
 
 \end{document}
