@@ -1,5 +1,5 @@
 function sigmin = grid_algo(A, m)
-    %g = 1/norm(((x+y)))
+    %g(x,y) = 1/norm(((x+y)))
     %z(0) = newtons_method()
     
     %[S, U, V] = svd(z(1) - A);
@@ -12,8 +12,8 @@ function sigmin = grid_algo(A, m)
     %end
     %sigmin = z;
     [N,~] = size(A);
-    x = logspace(-1, 1, m);
-    y = logspace(-1, 1, m);
+    x = logspace(-1,1, m);
+    y = logspace(-1,1, m);
     for k=1:m , for j = 1:m
         sigmin(j,k) = min(svd((x(k)+y(j)*1i*eye(N)-A)));
     end,end
