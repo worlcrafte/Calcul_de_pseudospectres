@@ -1,38 +1,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.linalg import lu
 
-n = 50
-A = np.random.randint(1, 10, size=(n, n))  # random integers between 1 and 10
+def generate_matrix(N):
+    mu = 1
+    sigma = 5
+    np.random.seed(0)  # similar to rng('Default') in MATLAB
+    res = np.random.normal(mu, sigma, (N, N))
+    return res
 
-# adjust the region in the complex plane and epsilon
-x_min, x_max, y_min, y_max = -10, 10, -10, 10  # Adjusting the range
-resolution = 100  # higher resolution
-epsilon = 0.01  # adjusting epsilon for better visualization
+def grid2(A, m):
+    # 
+    N = A.shape[0]
+    x = np.linspace(-1.5, 1.5, m)
+    y = np.linspace(-1.5, 1.5, m)
+    maxit = m
+    sigmin = np.zeros((m, m))
 
-# recreate the grid of complex numbers
-x = np.linspace(x_min, x_max, resolution)
-y = np.linspace(y_min, y_max, resolution)
-X, Y = np.meshgrid(x, y)
-Z = X + 1j * Y
+    for k in range(m):
+        for j in range(m):
+            B = (x[k] + y[j]*1j) * np.eye(N) - A
+            u = np.random.randn(N) + 1j * np.random.randn(N)
+            L, U = lu(B, permute_l=True)
+            Ls = L.conj().T
+            Us = U.conj().T
+            sigold = 1
 
-# recompute the pseudospectrum
-pseudospectrum = np.zeros(Z.shape, dtype=bool)
-I = np.identity(A.shape[0])
-for i in range(Z.shape[0]):
-    for j in range(Z.shape[1]):
-        lambda_ij = Z[i, j]
-        try:
-            norm = np.linalg.norm(np.linalg.inv(A - lambda_ij * I))
-            pseudospectrum[i, j] = norm > (1 / epsilon)
-        except np.linalg.LinAlgError:
-            pseudospectrum[i, j] = True
+            for p in range(maxit):
+                u = np.linalg.solve(Ls, np.linalg.solve(Us, np.linalg.solve(U, np.linalg.solve(L, u)))) # u = Ls\(Us\(U\(L)))
+                sig = 1 / np.linalg.norm(u)
+                
+                if np.abs(sigold/sig - 1) < 1e-2:
+                    break
 
-# plotting
-plt.figure(figsize=(8, 8))
-plt.imshow(pseudospectrum, extent=(x_min, x_max, y_min, y_max), origin='lower')
-plt.colorbar(label='Part of ε-pseudospectrum')
-plt.xlabel('Real Part')
-plt.ylabel('Imaginary Part')
-plt.title(f'ε-Pseudospectrum of Matrix A (ε = {epsilon})')
-plt.grid(True)
-plt.show()
+                u = sig * u
+                sigold = sig
+
+            sigmin[j, k] = np.sqrt(sig)
+
+    plt.contour(x, y, np.log10(sigmin))
+    # plt.xlabel('Real Part')
+    # plt.ylabel('Imaginary Part')
+    plt.title('Contour Plot of the ε-Pseudospectrum of Matrix A')
+    plt.grid(True)
+    plt.show()
+
+A = generate_matrix(50)
+grid2(A, 100)
