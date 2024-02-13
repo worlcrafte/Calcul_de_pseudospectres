@@ -1,0 +1,14 @@
+N = 10;
+nb_mesure = 20; 
+
+ymin = 0;
+
+x = 10:10:200;
+me
+
+
+for i=N:nb_mesure
+    C = gallery('chebspec',N);
+    C = C(1:end-1,1:end-1);
+    
+end

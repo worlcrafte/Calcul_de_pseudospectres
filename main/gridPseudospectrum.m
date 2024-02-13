@@ -4,7 +4,7 @@ function gridPseudospectrum(A, epsilon, m)
     % m: The number of points per unit in the grid
 
     % use gershgorinRegion to determine the region of interest
-    [xmin, xmax, ymin, ymax] = gershgorinRegion(A, epsilon);
+    [xmin, xmax, ymin, ymax] = gershgorinRegion(A, min(epsilon));
     
     % Create the grid of points
     x = linspace(xmin, xmax, m);
