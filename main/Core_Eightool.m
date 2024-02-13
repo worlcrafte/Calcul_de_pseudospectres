@@ -1,16 +1,20 @@
-function res = Core_Eightool(A,m,epsilon)
-    maxit = m; 
+function res = Core_Eightool(A,epsilon,m)
+    maxit = sqrt(m); 
+    [xmin, xmax, ymin, ymax] = gershgorinRegion(A, min(epsilon));
     [N,~] = size(A);
     T = schur(A,'complex');
-    x = linspace(-1.5,1.5, m);
-    y = linspace(-1.5,1.5, m);
+    x = linspace(xmin, xmax, m);
+    y = linspace(ymin, ymax, m);
+    [X, Y] = meshgrid(x, y);
+    H = zeros(maxit);
+    sigmin = zeros(m,m);
     for k=1:m, for j=1:m
         T1 = (x(k)+y(j)*1i)*eye(N)-T; 
         T2=T1';
         sigold = 0;
         qold = zeros(N,1);
         beta =0;
-        H = [];
+        %H = [];
         q = randn(N,1) + 1i * randn(N,1);
         q = q/norm(q);
         for p=1:maxit
@@ -29,7 +33,7 @@ function res = Core_Eightool(A,m,epsilon)
         end
         sigmin(j,k) = sqrt(sig);
     end,end
-    contour(x,y,log10(sigmin));
+    contourf(X, Y, log10(sigmin), 20); 
     %scatter(x,y,sigmin);
 end
 
