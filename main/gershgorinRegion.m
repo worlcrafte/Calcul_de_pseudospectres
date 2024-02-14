@@ -11,7 +11,7 @@ function [xmin, xmax, ymin, ymax] = gershgorinRegion(A, epsilon)
         radii(i) = sum(abs(A(i, :))) - abs(A(i, i));
     end
 
-    % adjust the radii with epsilon
+    % adjust the radii with epsilon Ajouter + que espilon et prouver 
     radii = radii + epsilon;
 
     % determine the region of interest
