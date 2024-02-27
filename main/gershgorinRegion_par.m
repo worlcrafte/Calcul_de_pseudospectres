@@ -1,4 +1,4 @@
-function [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A, epsilon)
+function [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A,thread, epsilon)
     % A: The matrix for which to calculate the Gershgorin circles
     % epsilon: The level of perturbation to consider for adjusting the radii
 
@@ -8,7 +8,7 @@ function [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A, epsilon)
 
     % open a parallel pool if it's not already open
     if isempty(gcp('nocreate'))
-        parpool;
+        parpool(thread);
     end
 
     % calculate the radii of the Gershgorin circles in parallel

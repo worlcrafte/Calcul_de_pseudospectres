@@ -15,7 +15,7 @@ function [X,Y,sigmin] = gridPseudospectrum_par_r(A, thread,xmin,xmax,ymin,ymax)
 
     % open a parallel pool if it's not already open
     if isempty(gcp('nocreate'))     
-        parpool('Threads');
+        parpool(thread);
     end
 
     %setappdata(f,'canceling',0);
