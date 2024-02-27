@@ -1,8 +1,9 @@
-function gridPseudospectrum_par(A, epsilon,m)
+function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread)
     % A: The matrix for which to analyze the pseudospectrum
     % epsilon: The perturbation level to adjust the Gershgorin disks
     % m: The number of points per unit in the grid
-
+    [n, ~] = size(A);
+    m = n*n;
     % use gershgorinRegion_par to determine the region of interest
     [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A, min(epsilon));
     
@@ -16,21 +17,36 @@ function gridPseudospectrum_par(A, epsilon,m)
     sigmin = zeros(size(Z));
 
     % open a parallel pool if it's not already open
-    if isempty(gcp('nocreate'))
-        parpool;
+    if isempty(gcp('nocreate'))     
+        parpool('Threads',thread);
     end
-    
+    f = waitbar(0,'Computes');
+
+    %setappdata(f,'canceling',0);
     % calculate the pseudospectrum in parallel
+    progressbar('compute...');
+    i=0;
     parfor k = 1:numel(Z)
+        %t = getCurrentTask();
         sigmin(k) = min(svd(Z(k)*eye(n) - A));
+        %if t.ID == 1
+            disp(i);
+            progressbar(k/numel(Z));
+        %waitbar(k/numel(Z),f,'test');
+        %end
     end
-    %faire une interface graphique, choisir un epsilon 
+    disp(m);
+    %faire une interface graphique, choisir un epsilon, puis encadrer les
+    %valeurs trouver avec la souris, puis recalculer le pseudo spectre dans
+    %la zone encarer. faire une barre de défilement. 
+    % Dans l'interface graphique pouvoir choisir le nombre de coeur (plus
+    % tard choisir l'algo qu'on veut choisir. (Graphique user interface. )
     % Visualize the pseudospectrum
-    contourf(X, Y, log10(sigmin), epsilon); % Use contourf for colored fill
+    %contourf(X, Y, log10(sigmin), epsilon); % Use contourf for colored fill
     %contour(X,Y,sigmin, epsilon);
-    colorbar;
-    title('Log10 of the smallest singular value of (\lambdaI - A)');
-    xlabel('Real part (\lambda)');
-    ylabel('Imaginary part (\lambda)');
-    grid on;
+    %colorbar;
+    %title('Log10 of the smallest singular value of (\lambdaI - A)');
+    %xlabel('Real part (\lambda)');
+    %ylabel('Imaginary part (\lambda)');
+    %grid on;
 end
