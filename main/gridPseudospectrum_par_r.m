@@ -12,15 +12,15 @@ function [X,Y,sigmin] = gridPseudospectrum_par_r(A, thread,xmin,xmax,ymin,ymax)
     
     n = size(A, 1);
     sigmin = zeros(size(Z));
-
+    p=gcp('nocreate');
     % open a parallel pool if it's not already open
-    if isempty(gcp('nocreate'))     
-        parpool(thread);
+    if isempty(p)     
+        p=parpool(thread);
     end
 
     %setappdata(f,'canceling',0);
     % calculate the pseudospectrum in parallel
-    WaitMessage = parfor_wait(numel(Z), 'Waitbar', true);
+    %WaitMessage = parfor_wait(numel(Z), 'Waitbar', true);
     parfor (k = 1:numel(Z), thread)
         sigmin(k) = min(svd(Z(k)*eye(n) - A));
         %if t.ID == 1
@@ -29,7 +29,7 @@ function [X,Y,sigmin] = gridPseudospectrum_par_r(A, thread,xmin,xmax,ymin,ymax)
         
         %end
         %progressbar(p/100);
-        WaitMessage.Send;
+     %   WaitMessage.Send;
         %waitbar(p/100,f,'test');
         %showTimeToCompletion( p/100, [], [], startTime );
     end
