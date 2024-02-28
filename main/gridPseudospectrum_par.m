@@ -5,7 +5,7 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread)
     [n, ~] = size(A);
     m = n*n;
     % use gershgorinRegion_par to determine the region of interest
-    [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A,thread, epsilon);
+    [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A,thread, min(epsilon));
     
     % create the grid of points
     x = linspace(xmin, xmax, m);
