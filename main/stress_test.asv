@@ -1,0 +1,12 @@
+function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function)
+%STRESS_TEST Summary of this function goes here
+%   Detailed explanation goes here
+    A = rand_function(size_from);
+    time_mesuerment = zeros(thread_to-thread_from,1);
+    matrix_size = zeros()
+    for n = size_from:size_to:step
+        for t = thread_from:thread_to
+            
+        end
+    end 
+

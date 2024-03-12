@@ -1,9 +1,9 @@
-function [X,Y,sigmin] = gridPseudospectrum_par_r(A, thread,xmin,xmax,ymin,ymax)
+function [X,Y,sigmin] = gridPseudospectrum_par_r(A, thread,xmin,xmax,ymin,ymax,m)
     % A: The matrix for which to analyze the pseudospectrum
     % epsilon: The perturbation level to adjust the Gershgorin disks
     % m: The number of points per unit in the grid
     [n, ~] = size(A);
-    m = n*n;
+    %m = n*n;
     % create the grid of points
     x = linspace(xmin, xmax, m);
     y = linspace(ymin, ymax, m);

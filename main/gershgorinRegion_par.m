@@ -6,13 +6,14 @@ function [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A,thread, epsilon)
     radii = zeros(n, 1); 
     centers = diag(A);
     p = gcp('nocreate');
+    disp(p);
     % open a parallel pool if it's not already open
     if isempty(p)
         p=parpool();
     end
 
     % calculate the radii of the Gershgorin circles in parallel
-    parfor (i = 1:n,p,thread)
+    parfor (i = 1:n,thread)
         radii(i) = sum(abs(A(i, :))) - abs(A(i, i));
     end
 
