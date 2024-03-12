@@ -6,7 +6,6 @@ function [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A,thread, epsilon)
     radii = zeros(n, 1); 
     centers = diag(A);
     p = gcp('nocreate');
-    disp(p);
     % open a parallel pool if it's not already open
     if isempty(p)
         p=parpool();

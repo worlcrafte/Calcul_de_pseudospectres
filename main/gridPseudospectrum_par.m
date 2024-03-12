@@ -16,7 +16,6 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
     n = size(A, 1);
     sigmin = zeros(size(Z));
     p =gcp('nocreate');
-    disp(p);
 
     % open a parallel pool if it's not already open
     if isempty(p)     
