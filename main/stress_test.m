@@ -55,14 +55,24 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     
     % vector of plots for legend
     h = zeros(n,1);
-
+    txt = "size matrix : " + string(size_matrix(1));
     % generate plots
-    h(1) = plot(threads,time_mesurment(1,:));
+    time_mesurment = time_mesurment * 10^3;
+    
+    disp(time_mesurment);
+
+    h(1) = plot(threads,log10(time_mesurment(1,:)),'DisplayName',txt);
+    
+    title('Measured time');
+    xlabel('Number of thread used');
+    ylabel('log10 of the measured time in ms');
     hold on;
     for i = 2:n
-        h(i) = plot(threads,time_mesurment(i,:));
+        txt = "size matrix : " + string(size_matrix(i));
+        h(i) = plot(threads,log10(time_mesurment(i,:)),'DisplayName',txt);
     end
-
+    
     hold off;
+    legend;
 end
 
