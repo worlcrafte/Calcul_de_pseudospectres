@@ -1,4 +1,4 @@
-function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function,epsilon)
+function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function,epsilon,gui)
 % input : 
 %       - size_from :   size of the matrix at the begining
 %       - size_to   :   size of the matrix at the end of the test
@@ -61,18 +61,18 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     
     disp(time_mesurment);
 
-    h(1) = plot(threads,log10(time_mesurment(1,:)),'DisplayName',txt);
+    h(1) = plot(gui,threads,log10(time_mesurment(1,:)),'DisplayName',txt);
     
     title('Measured time');
     xlabel('Number of thread used');
     ylabel('log10 of the measured time in ms');
-    hold on;
+    hold(gui,'on');
     for i = 2:n
         txt = "size matrix : " + string(size_matrix(i));
-        h(i) = plot(threads,log10(time_mesurment(i,:)),'DisplayName',txt);
+        h(i) = plot(gui,threads,log10(time_mesurment(i,:)),'DisplayName',txt);
     end
     
-    hold off;
-    legend;
+    hold(gui,"off");
+    legend(gui);
 end
 
