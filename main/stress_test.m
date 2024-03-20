@@ -59,18 +59,29 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     [~,m] = size(threads);
     speedup = zeros(thread_to-thread_from+1,n);
     efficiency = zeros(thread_to-thread_from+1,n);
-    disp(speedup);
     i=1;
     for j = 1:n 
         best = time_mesurment(1,j);
         a = best./time_mesurment(begining:m,j);
         speedup(:,j) = a(:);
-        disp(threads(begining:m)');
-        disp(a);
+        disp(speedup);
         efficiency(:,j) = a./threads(begining:m)';
         i=i+1;
     end
-    
+    disp("speedup : ");
+    disp(speedup);
+    barh(size_matrix,speedup');
+    xlabel('speedup');
+    ylabel('size matrices');
+    t = num2cell(string(threads(begining:m)));
+    legend(t{:});
+    title('Bar graph of computational speedup vs number of threads for various instance sizes');
+    barh(size_matrix,efficiency');
+    xlabel('Efficiency');
+    ylabel('size matrices');
+    t = num2cell(string(threads(begining:m)));
+    legend(t{:});
+    title('Bar graph of computational speedup vs number of threads for various instance sizes');
     % number of mesurement realised
     %[~,n] =size(size_matrix);
     
