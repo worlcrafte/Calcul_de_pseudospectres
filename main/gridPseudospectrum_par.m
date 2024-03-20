@@ -22,24 +22,14 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
         p=parpool();
     end
 
-    %setappdata(f,'canceling',0);
     % calculate the pseudospectrum in parallel
-    %WaitMessage = parfor_wait(numel(Z), 'Waitbar', true);
-    ppm = ParforProgressbar(numel(Z),'showWorkerProgress', true);
+    %ppm = ParforProgressbar(numel(Z),'showWorkerProgress', true);
     parfor (k = 1:numel(Z), thread)
         sigmin(k) = min(svd(Z(k)*eye(n) - A));
-        %if t.ID == 1
-         %   disp(i);    
         
-        %end
-        %progressbar(p/100);
-     %   WaitMessage.Send;
-        %waitbar(p/100,f,'test');
-        %showTimeToCompletion( p/100, [], [], startTime );
-
-        ppm.increment();
+        %ppm.increment();
     end
-    delete(ppm);
+    %delete(ppm);
     %faire une interface graphique, choisir un epsilon, puis encadrer les
     %valeurs trouver avec la souris, puis recalculer le pseudo spectre dans
     %la zone encarer. faire une barre de défilement. 

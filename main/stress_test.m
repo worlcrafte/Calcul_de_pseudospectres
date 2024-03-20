@@ -78,7 +78,8 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     ylabel('size matrices');
     t = num2cell(string(threads(begining:m)));
     legend(t{:});
-    title('Bar graph of computational speedup vs number of threads for various instance sizes');
+    title_name = sprintf('Bar graph of computational speedup vs number of threads for various instance sizes with %i points to evalueate', m_point_to_evaluate);
+    title(title_name);
 
     figure(2);
     barh(size_matrix,efficiency');
@@ -86,19 +87,17 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     ylabel('size matrices');
     t = num2cell(string(threads(begining:m)));
     legend(t{:});
-    title('Bar graph of computational speedup vs number of threads for various instance sizes');
-
+    title_name = sprintf('Bar graph of computational speedup vs number of threads for various instance sizes with %i points to evalueate', m_point_to_evaluate);
+    title(title_name);
     %Just plot
     [~,n] =size(size_matrix);
     txt = "size matrix :" + string(size_matrix);
     txt= num2cell(txt);
     h = zeros(n,1);
     figure(3);
-    disp("speedup")
-    disp(speedup);
-    disp("speedup(:,1)");
     h(1) = plot(threads(begining:m),speedup(:,1), "-o");
-    title("Graph of Computational Speedup vs Number of Threads for various Instance Sizes");
+    title_name = sprintf("Graph of Computational Speedup vs Number of Threads for various Instance Sizes with %i points to evalueate", m_point_to_evaluate);
+    title(title_name);
     ylabel('Speedup');
     xlabel('Number of workers');
     hold on;
@@ -108,6 +107,26 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     end
     legend(txt{:});
     hold off;
+
+     %Just plot
+    [~,n] =size(size_matrix);
+    txt = "size matrix :" + string(size_matrix);
+    txt= num2cell(txt);
+    h = zeros(n,1);
+    figure(4);
+    h(1) = plot(threads(begining:m),efficiency(:,1), "-o");
+    title_name = sprintf("Graph of Computational efficiency vs Number of Threads for various Instance Sizes with %i points to evalueate", m_point_to_evaluate);
+    title(title_name);
+    ylabel('Efficiency');
+    xlabel('Number of workers');
+    hold on;
+    for i = 2:n
+        figure(3);
+        h(i) = plot(threads(begining:m),efficiency(:,i), '-o');
+    end
+    legend(txt{:});
+    hold off;
+
 
     % number of mesurement realised
     %[~,n] =size(size_matrix);

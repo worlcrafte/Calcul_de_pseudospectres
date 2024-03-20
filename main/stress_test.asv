@@ -30,10 +30,10 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     p = gcp('nocreate');
     % delete the previous parpool to create a new one with all possible
     % workers.
-    %if ~ isempty(p)
-    %    delete(p);
-    %end
-    %parpool();
+    if ~ isempty(p)
+        delete(p);
+    end
+    parpool();
     begining = 1;
     if thread_from ~=1
         threads = [1 thread_from:thread_to];
@@ -70,6 +70,7 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     end
 
     %Histogramme
+    figure("Bar graph of computational speedup vs number of threads for various instance sizes");
     disp("speedup : ");
     disp(speedup);
     barh(size_matrix,speedup');
@@ -77,7 +78,9 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     ylabel('size matrices');
     t = num2cell(string(threads(begining:m)));
     legend(t{:});
-    title('Bar graph of computational speedup vs number of threads for various instance sizes');
+    title('Bar graph of computational speedup vs number of threads for various instance sizes with %i points to evalueate' );
+
+    figure(2);
     barh(size_matrix,efficiency');
     xlabel('Efficiency');
     ylabel('size matrices');
@@ -90,8 +93,21 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     txt = "size matrix :" + string(size_matrix);
     txt= num2cell(txt);
     h = zeros(n,1);
-    h(1) = plot(threads,speedup(:,1), "-o",);
-
+    figure(3);
+    disp("speedup")
+    disp(speedup);
+    disp("speedup(:,1)");
+    h(1) = plot(threads(begining:m),speedup(:,1), "-o");
+    title("Graph of Computational Speedup vs Number of Threads for various Instance Sizes");
+    ylabel('Speedup');
+    xlabel('Number of workers');
+    hold on;
+    for i = 2:n
+        figure(3);
+        h(i) = plot(threads(begining:m),speedup(:,i), '-o');
+    end
+    legend(txt{:});
+    hold off;
 
     % number of mesurement realised
     %[~,n] =size(size_matrix);
