@@ -8,11 +8,15 @@ function [points] = curveTracing(A, epsilon, K, lambda0, d0, tol)
 %       - tol: 
 % Explanation :
 %   
+%
+
+%! il faut le faire pour toutes les valeurs propores 
     %syms z;
     %g = min(svd(Z(k)*eye(n) - A))
     
     % Step 0: Compute the first point z1
     theta0 = epsilon;
+    %? lambda seul fct ?
     z1_new = lambda0 + theta0 * d0;
     [~, s_min, ~] = svds(z1_new * eye(size(A)) - A, 1, 'smallest'); % g(z)
     % Newton iteration for the first point
@@ -29,6 +33,8 @@ function [points] = curveTracing(A, epsilon, K, lambda0, d0, tol)
     points = z1;
     
     % computing subsequent points
+    %Il faut partir d'un point initiale et lorsqu'on a finit le tours avec
+    %une certaine tolérence on stop
     for k = 2:K
         % step 1: Prediction
         [u_min, ~, v_min] = svds(z1 * eye(size(A)) - A, 1, 'smallest');
