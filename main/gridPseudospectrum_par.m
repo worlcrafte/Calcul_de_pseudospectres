@@ -24,8 +24,9 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
 
     % calculate the pseudospectrum in parallel
     %ppm = ParforProgressbar(numel(Z),'showWorkerProgress', true);
+    e = eye(n);
     parfor (k = 1:numel(Z), thread)
-        sigmin(k) = min(svd(Z(k)*eye(n) - A));
+        sigmin(k) = min(svd(Z(k)*e - A));
         
         %ppm.increment();
     end

@@ -73,7 +73,7 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     figure(1);
     disp("speedup : ");
     disp(speedup);
-    barh(size_matrix,speedup');
+    barh(size_matrix(:).^2,speedup');
     xlabel('speedup');
     ylabel('size matrices');
     t = num2cell(string(threads(begining:m)));
@@ -82,16 +82,16 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     title(title_name);
 
     figure(2);
-    barh(size_matrix,efficiency');
+    barh(size_matrix(:).^2,efficiency');
     xlabel('Efficiency');
     ylabel('size matrices');
-    t = num2cell(string(threads(begining:m)));
+    %t = num2cell(string(threads(begining:m)));
     legend(t{:});
     title_name = sprintf('Bar graph of computational speedup vs number of threads for various instance sizes with %i points to evalueate', m_point_to_evaluate);
     title(title_name);
     %Just plot
     [~,n] =size(size_matrix);
-    txt = "size matrix :" + string(size_matrix);
+    txt = "size matrix :" + string(size_matrix(:).^2);
     txt= num2cell(txt);
     h = zeros(n,1);
     figure(3);
@@ -110,7 +110,7 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
 
      %Just plot
     [~,n] =size(size_matrix);
-    txt = "size matrix :" + string(size_matrix);
+    txt = "size matrix :" + string(size_matrix(:).^2);
     txt= num2cell(txt);
     h = zeros(n,1);
     figure(4);
@@ -135,7 +135,7 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     %h = zeros(n,1);
     %txt = "size matrix : " + string(size_matrix(1));
     % generate plots
-    %time_mesurment = time_mesurment * 10^3;
+    %time_mesurment = time_mesurment * 
     
     %disp(time_mesurment);
 
