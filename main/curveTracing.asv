@@ -1,4 +1,4 @@
-function points = curveTracing(A, epsilon, lambda0, d0, tol, max_it)
+function [points] = curveTracing(A, epsilon,K, lambda0, d0, tol, max_it)
 % input : 
 %       - A: matrix
 %       - epsilon: 
@@ -15,17 +15,16 @@ function points = curveTracing(A, epsilon, lambda0, d0, tol, max_it)
     %? lambda seul fct ?
     z1_new = lambda0 + theta0 * d0;
     Id = eye(size(A));
-    [~, s_min, ~] = svds(z1_new * Id - A, 1, 'smallest'); % g(z_new)
-    
+    %[~, s_min, ~] = svds(z1_new .* Id - A, 1, 'smallest'); % g(z_new)
+    [~, s_min, ~] = svds(z1_new .* Id - A); % g(z_new)
     % Newton iteration for the first point
     disp("g(z_new) computed")
     k=0;
-
-
     while abs(s_min - epsilon) / epsilon > tol
         z1_old = z1_new;
         % compute the singular triplet for z1_old * I - A
-        [u_min, s_min, v_min] = svds(z1_old * Id - A, 1, 'smallest');
+        %[u_min, s_min, v_min] = svds(z1_old * Id - A, 1, 'smallest');
+        [u_min, s_min, v_min] = svds(z1_old * Id - A
         % compute the next Newton iterate z1_new (equation 2.2)
         theta = (s_min - epsilon)/real(conj(d0) * conj(v_min).' * u_min);
         z1_new = z1_old - theta * d0;
@@ -58,7 +57,7 @@ function points = curveTracing(A, epsilon, lambda0, d0, tol, max_it)
         z_k = zbar_k - (s_min-epsilon)/(conj(u_min).' * v_min);
         
         points = [points z_k];
-        %disp(points)
+        disp(points)
         z1 = z_k;
         if abs(z1-first_point)<=epsilon
             break
@@ -72,8 +71,8 @@ function points = curveTracing(A, epsilon, lambda0, d0, tol, max_it)
     x = linspace(xmin, xmax, m);
     y = linspace(ymin, ymax, m);
     [X, Y] = meshgrid(x, y);
-    disp(points);
-    contourf(X, Y, log10(points), epsilon); % Use contourf for colored fill
+    var = real(points)
+    contourf(real(X), imag(Y), log10(points), epsilon); % Use contourf for colored fill
     %colorbar;
     title('Log10 of the smallest singular value of (\lambdaI - A)');
     xlabel('Real part (\lambda)');
