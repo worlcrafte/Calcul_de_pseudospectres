@@ -37,11 +37,7 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
     % Dans l'interface graphique pouvoir choisir le nombre de coeur (plus
     % tard choisir l'algo qu'on veut choisir. (Graphique user interface. )
     % Visualize the pseudospectrum
-    %contourf(X, Y, log10(sigmin), epsilon); % Use contourf for colored fill
-    %contour(X,Y,sigmin, epsilon);
-    %colorbar;
-    %title('Log10 of the smallest singular value of (\lambdaI - A)');
-    %xlabel('Real part (\lambda)');
-    %ylabel('Imaginary part (\lambda)');
+    epsilon(2) = epsilon(1);
+    contourf(X, Y, log10(sigmin),epsilon);
     %grid on;
 end
