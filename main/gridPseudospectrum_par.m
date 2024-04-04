@@ -38,6 +38,7 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
     % tard choisir l'algo qu'on veut choisir. (Graphique user interface. )
     % Visualize the pseudospectrum
     epsilon(2) = epsilon(1);
-    contourf(X, Y, log10(sigmin),epsilon);
+    [C,h ] = contourf(X, Y, (sigmin), (epsilon));
+    clabel(C, h);
     %grid on;
 end

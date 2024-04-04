@@ -3,12 +3,14 @@ function points = curveTracing(A, epsilon, lambda0, d0, tol, max_it)
 %       - A: matrix
 %       - epsilon: 
 %       - K: number of points to be determined
-%       - lambda0: epsilon-pseudoeigenvalue of A
+%       - lambda0: epsilon-pseudoeigenvalue of A. La valeur propre choisie.
 %       - d0: search direction for the first point
 %       - tol: relative accuracy of the first point
 % Explanation :
-%   
+% prendre une valeur propre et appelé curve tracing avec. Puis faure demême avec   
 %
+
+
     
     % Step 0: Compute the first point z1
     theta0 = epsilon;
@@ -30,10 +32,6 @@ function points = curveTracing(A, epsilon, lambda0, d0, tol, max_it)
         theta = (s_min - epsilon)/real(conj(d0) * conj(v_min).' * u_min);
         z1_new = z1_old - theta * d0;
         k=k+1;
-        if k>max_it
-            disp("maximal number of iterations reach");
-            %quit(1);
-        end
     end
     disp("Newton done")
     z1 = z1_new;

@@ -58,9 +58,10 @@ function points = curveTracing2(A, epsilon, lambda0, d0, tol, max_it)
     epsilon(2) = epsilon(1);
     % use contourf to plot the pseudospectrum levels
     figure;
-    [C, h] = contourf(X, Y, log10(pseudoValues), epsilon); % needs to be modified
-    clabel(C, h);
-    colorbar;
+    %[C, h] = contourf(X, Y, log10(pseudoValues),epsilon); % needs to be modified
+    %clabel(C, h);
+    plot(real(points), imag(points));
+    %colorbar;
     title('Pseudospectral Level Curves');
     xlabel('Real Part');
     ylabel('Imaginary Part');
