@@ -21,8 +21,10 @@ function gridPseudospectrum(A, epsilon, m)
     end
 
     % Visualize the pseudospectrum
-    contourf(X, Y, log10(sigmin), 20); % Use contourf for colored fill
-    colorbar;
+    epsilon(2) = epsilon(1);
+    figure(1);
+    [C,h ] = contourf(X, Y, (sigmin), (epsilon));
+    clabel(C, h);
     title('Log10 of the smallest singular value of (\lambdaI - A)');
     xlabel('Real part (\lambda)');
     ylabel('Imaginary part (\lambda)');
