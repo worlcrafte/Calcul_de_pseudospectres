@@ -28,6 +28,7 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
     parfor (k = 1:numel(Z), thread)
         sigmin(k) = min(svd(Z(k)*e - A));
         
+        
         ppm.increment();
     end
     delete(ppm);
@@ -37,8 +38,8 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
     % Dans l'interface graphique pouvoir choisir le nombre de coeur (plus
     % tard choisir l'algo qu'on veut choisir. (Graphique user interface. )
     % Visualize the pseudospectrum
-    epsilon(2) = epsilon(1);
-    [C,h ] = contourf(X, Y, (sigmin), (epsilon));
-    clabel(C, h);
+    %epsilon(2) = epsilon(1);
+    %[C,h ] = contourf(X, Y, (sigmin), (epsilon));
+    %clabel(C, h);
     %grid on;
 end
