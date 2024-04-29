@@ -4,20 +4,27 @@ function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn,gui)
 %       epsilon:
 %       d0
 %       tol
-    m = 100;
+    m = 2000;
     %[~, s_min, ~] = svd(A);
-    [X, Y, sigmin] = gridPseudospectrum_par(A, epsilon, 1,m);
+    [X, Y, sigmin] = gridPseudospectrum_par(A, epsilon, 4,m);
 
     %s = diag(s_min);
     s = eig(A);
     %figure();
     hold(gui,'on');
     [~,h] = contourf(gui,X, Y, log10(sigmin), log10([epsilon epsilon]));  % Utilisation de log10 pour un meilleur affichage
+    %drawnow;
     i=1;
     pred = zeros(numel(s),1);
+    [siz,~] = size(s);
     for lambda0=s.'
-        points = Prediction_correction(A,epsilon, lambda0, d0, tol_Newton, tol_turn);
-        pred(i) = scatter(gui,real(points), imag(points), 'filled');
+        r = abs(real(lambda0) + imag(lambda0));
+        color = [r - floor(r), i/siz, 1-i/siz];
+        plot(gui,real(lambda0), imag(lambda0),'X', 'MarkerEdgeColor','red');
+        drawnow;
+        points = Prediction_correction(A,epsilon, lambda0, d0, tol_Newton, tol_turn,color,gui);
+        %pred(i) = scatter(gui,real(points), imag(points), 'filled');
+        %eigen value computed.
         i=i+1;
     end
     hold(gui,"off");
@@ -33,7 +40,7 @@ function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn,gui)
     %h.Visible = 'on';
 end
 
-function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn)
+function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn, color,gui)
 % input : 
 %       - A: matrix
 %       - epsilon: 
@@ -79,27 +86,43 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
     %Il faut partir d'un point initiale et lorsqu'on a finit le tours avec
     %une certaine tolérence on stop
     %k=2;
+    k=0;
     while 1
+        
         % step 1: Prediction
         [u_min, ~, v_min] = svds(z1 * Id - A, 1, 'smallest');
         rk = 1i*v_min' * u_min / abs(v_min' * u_min); % check
         % determine the steplength tau
-        tau = 0.1; % i fix steplength on 0.1, result must be correct. might change later.
+        tau =0.1; % i fix steplength on 0.1, result must be correct. might change later.
         zbar_k = z1 + tau * rk; %?
 
+
+        %! Cette partie est peut être la partie qui poserait problème lors
+        %du Newton (essayer d'isoler une composante pour essayer de comprendre le problème)!!!!!!!
+            
+        %Dans le rapport parler des composantes connexe sur le fait qu'on
+        %puisse parler de l'une à l'autre. Il faut que celui qui lit le
+        %rapport le comprenne sans lire les articles.
+
         % step 2: Correction (via one Newton step)
-        % compute the singular triplet for zbar_k * I - A
+        % compute the singular triplet for zbar_k * I - A   
         [u_min, s_min, v_min] = svds(zbar_k * Id - A, 1, 'smallest');
         % compute the corrected point z_k (equation 2.3)
         z_k = zbar_k - (s_min-epsilon)/(u_min' * v_min);
         
         points = [points z_k];
-        %disp(points)
         z1 = z_k;
         disp(abs(z1-first_point));
+        scatter(gui,real(z_k), imag(z_k), 'MarkerEdgeColor',color);
+        drawnow;
         if abs(z1-first_point)<=tol_turn
             break
         end
+        if k>150
+            disp(lambda0);
+            break
+        end
+        k=k+1;
     end
     disp("finished");
 end
