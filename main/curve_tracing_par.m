@@ -1,31 +1,20 @@
-function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn,gui)
+function curve_tracing_par(A,epsilon,d0,tol_Newton, tol_turn,gui)
 %input:
 %       A: matrix 
 %       epsilon:
 %       d0
 %       tol
-    m = 2000;
-    %[~, s_min, ~] = svd(A);
-    [X, Y, sigmin] = gridPseudospectrum_par(A, epsilon, 16,m);
 
-    %s = diag(s_min);
+   
     s = eig(A);
-    %figure();
-    hold(gui,'on');
-    [~,h] = contourf(gui,X, Y, log10(sigmin), log10([epsilon epsilon]));  % Utilisation de log10 pour un meilleur affichage
-    drawnow;
-
     pred = zeros(numel(s),1);
     [siz,~] = size(s);
-
     parfor lambda0=1:siz
         r = abs(real(lambda0) + imag(lambda0));
         color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
         
         drawnow;
         points(lambda0,:) = Prediction_correction(A,epsilon, s(lambda0), d0, tol_Newton, tol_turn,color,gui);
-        %pred(i) = scatter(gui,real(points), imag(points), 'filled');
-        %eigen value computed.
         disp(s(lambda0));
     end
     plot(gui,real(s), imag(s),'X', 'MarkerEdgeColor','red');
@@ -36,11 +25,6 @@ function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn,gui)
     ylabel(gui,'Imaginary part (\lambda)');
     title(gui,'Combined Pseudospectrum Visualization');
     grid(gui,'on');
-    %[~,limit] = size(pred);
-    %for i=1:limit
-    %    pred(i).Visible= false;
-    %end
-    %h.Visible = 'on';
 end
 
 function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn, color,gui)

@@ -1,4 +1,4 @@
-function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function,epsilon,gui)
+function time_mesurment = stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function,epsilon,gui)
 % input : 
 %       - size_from :   size of the matrix at the begining
 %       - size_to   :   size of the matrix at the end of the test
@@ -21,7 +21,9 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
 
     %generate the matrix 
     A = rand_function(size_from);
-
+    d0=1i;
+    tol_Newton = 0.01;
+    tol_turn = 0.01;
     size_matrix = size_from:step:size_to;
     [~,n] = size(size_matrix);
     time_mesurment = zeros(thread_to-thread_from,n);
@@ -35,17 +37,20 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     end
     parpool();
     begining = 1;
-    if thread_from ~=1
-        threads = [1 thread_from:thread_to];
-        begining = 2;
-    else 
-        threads =  thread_from:thread_to;
-    end
+    %if thread_from ~=1
+    %    threads = [1 thread_from:thread_to];
+    %    begining = 2;
+    %else 
+    %    threads =  thread_from:thread_to;
+    %end
     %   time sampling
+    threads = [1 2 8 16];
     for n = size_matrix
+        disp(n);
         for t = threads
+            disp(t);
             tic
-            gridPseudospectrum_par(A,epsilon,t,m_point_to_evaluate);
+            curveTracing(A,epsilon,d0,tol_Newton,tol_turn,t,gui);
             time_mesurment(i,j) = toc;
             i=i+1;
         end
@@ -55,6 +60,10 @@ function stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thr
     end
     % generate a vector for the x axe
     disp(time_mesurment)
+    
+end
+
+function aa()
     [~,n] = size(size_matrix);
     [~,m] = size(threads);
     speedup = zeros(thread_to-thread_from+1,n);

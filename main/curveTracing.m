@@ -1,25 +1,28 @@
-
-
-function curveTracing(A,epsilon,d0,tol)
-    
-    %[~, s_min, ~] = svd(A);
-
-    %s = diag(s_min);
+function [h,pred] = curveTracing(A,epsilon,d0,tol_Newton, tol_turn,thread,gui)
+%input:
+%       A: matrix 
+%       epsilon:
+%       d0
+%       tol
     s = eig(A);
-    figure();
-    hold on;
-    i=1;
-    for lambda0=s.'
-        disp(i);
-        points = Prediction_correction(A,epsilon, lambda0, d0, tol);
-        scatter(real(points), imag(points));
-        i=i+1;
-    end
-    hold off;
+    %figure();
+    pred = zeros(numel(s),1);
+    [siz,~] = size(s);
 
+    parfor (lambda0=1:siz,thread)
+        r = abs(real(lambda0) + imag(lambda0));
+        color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
+        
+        %drawnow;
+        Prediction_correction(A,epsilon, s(lambda0), d0, tol_Newton, tol_turn,color,gui);
+        %pred(i) = scatter(gui,real(points), imag(points), 'filled');
+        %eigen value computed.
+        %disp(s(lambda0));
+    end
+    
 end
 
-function points = Prediction_correction(A, epsilon, lambda0, d0, tol)
+function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn, color,gui)
 % input : 
 %       - A: matrix
 %       - epsilon: 
@@ -31,30 +34,33 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol)
 % prendre une valeur propre et appelé curve tracing avec. Puis faure demême avec   
 %
 
-    disp("lambda : ");
-    disp(lambda0);
-    disp("fin");
+    %disp("lambda : ");
+    %disp(lambda0);
+    %disp("fin");
     % Step 0: Compute the first point z1
     theta0 = epsilon;
-    %? lambda seul fct ?
-    z1_new = lambda0 + theta0 * d0;
+    %? lambda seul fct ? Non
+    %disp(theta0);   
+    z1_new = lambda0 + 0.5*theta0 * d0;
     %z1_new = lambda0;
-    Id = eye(size(A));
+    Id = eye(size(A));   
     [~, s_min, ~] = svds(z1_new .* Id - A, 1, 'smallest'); % g(z_new)
     
     % Newton iteration for the first point
-    disp("g(z_new) computed")
-    k=0;
+    %disp("g(z_new) computed")
+    k=0.5;
 
-
-    while abs(s_min - epsilon) / epsilon > tol
+    disp("Newton");
+    while abs(s_min - epsilon) / epsilon > tol_Newton
         z1_old = z1_new;
         % compute the singular triplet for z1_old * I - A
         [u_min, s_min, v_min] = svds(z1_old .* Id - A, 1, 'smallest');
         % compute the next Newton iterate z1_new (equation 2.2)
-        theta = (s_min - epsilon)/real(conj(d0) * conj(v_min).' * u_min);
-        z1_new = z1_old - theta * d0;
-        k=k+1;
+        theta = (s_min - epsilon)/real(conj(d0) * v_min' * u_min);
+        z1_new = z1_old - tol_Newton*theta * d0; 
+        k=0.5*k;
+       
+        %disp(abs(s_min - epsilon) / epsilon);
     end
     disp("Newton done")
     z1 = z1_new;
@@ -64,26 +70,44 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol)
     %Il faut partir d'un point initiale et lorsqu'on a finit le tours avec
     %une certaine tolérence on stop
     %k=2;
+    k=0;    
     while 1
+        
         % step 1: Prediction
         [u_min, ~, v_min] = svds(z1 * Id - A, 1, 'smallest');
-        rk = 1i*conj(v_min).' * u_min / abs(conj(v_min).' * u_min); % check
+        rk = 1i*v_min' * u_min / abs(v_min' * u_min); % check
         % determine the steplength tau
         tau = 0.1; % i fix steplength on 0.1, result must be correct. might change later.
         zbar_k = z1 + tau * rk; %?
 
+
+        %! Cette partie est peut être la partie qui poserait problème lors
+        %du Newton (essayer d'isoler une composante pour essayer de comprendre le problème)!!!!!!!
+            
+        %Dans le rapport parler des composantes connexe sur le fait qu'on
+        %puisse parler de l'une à l'autre. Il faut que celui qui lit le
+        %rapport le comprenne sans lire les articles.
+
         % step 2: Correction (via one Newton step)
-        % compute the singular triplet for zbar_k * I - A
+        % compute the singular triplet for zbar_k * I - A   
         [u_min, s_min, v_min] = svds(zbar_k * Id - A, 1, 'smallest');
         % compute the corrected point z_k (equation 2.3)
-        z_k = zbar_k - (s_min-epsilon)/(conj(u_min).' * v_min);
+        z_k = zbar_k - (s_min-epsilon)/(u_min' * v_min);
         
         points = [points z_k];
-        %disp(points)
         z1 = z_k;
-        if abs(z1-first_point)<=epsilon
+        %disp(abs(z1-first_point));
+        %scatter(gui,real(z_k), imag(z_k), 'MarkerEdgeColor',color);
+        %drawnow;
+        if abs(z1-first_point)<=tol_turn
             break
         end
+        if k>150
+            %disp("break");
+            %disp(lambda0);
+            break
+        end
+        k=k+1;
     end
-    disp("finished");
+    %disp("finished");
 end
