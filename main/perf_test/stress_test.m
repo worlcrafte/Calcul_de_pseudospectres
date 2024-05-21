@@ -1,4 +1,4 @@
-function time_mesurment = stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function,epsilon,gui)
+function time_mesurment_curve = stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function,epsilon,gui)
 % input : 
 %       - size_from :   size of the matrix at the begining
 %       - size_to   :   size of the matrix at the end of the test
@@ -22,8 +22,6 @@ function time_mesurment = stress_test(size_from,size_to,step,m_point_to_evaluate
     %generate the matrix 
     A = rand_function(size_from);
     d0=1i;
-    tol_Newton = 0.01;
-    tol_turn = 0.01;
     size_matrix = size_from:step:size_to;
     [~,n] = size(size_matrix);
     time_mesurment = zeros(thread_to-thread_from,n);
@@ -44,22 +42,46 @@ function time_mesurment = stress_test(size_from,size_to,step,m_point_to_evaluate
     %    threads =  thread_from:thread_to;
     %end
     %   time sampling
+    tol = [];
     threads = [1 2 8 16];
     for n = size_matrix
+        A = rand_function(n);
+        [xmin, xmax, ymin, ymax] =  gershgorinRegion_par(A,16,epsilon);
+        x = linspace(xmin, xmax, m_point_to_evaluate);
+        y = linspace(ymin, ymax, m_point_to_evaluate);
+        [X, Y] = meshgrid(x, y);
+        tol_Newton = sqrt(((X(1)-X(2))^2 + (Y(1)-Y(2))^2));
+        while tol_Newton>epsilon
+            A = rand_function(n);
+            [xmin, xmax, ymin, ymax] =  gershgorinRegion_par(A,t,epsilon);
+            x = linspace(xmin, xmax, m_point_to_evaluate);
+            y = linspace(ymin, ymax, m_point_to_evaluate);
+            [X, Y] = meshgrid(x, y);
+            tol_Newton = sqrt(((X(1)-X(2))^2 + (Y(1)-Y(2))^2));
+        end
         disp(n);
         for t = threads
             disp(t);
+            %disp("grid");
+            %tic
+            %[X,Y,~] = gridPseudospectrum_par(A, epsilon,t,m_point_to_evaluate);
+            %time_mesurment_grid(i,j) = toc;
+            disp(tol_Newton);
+            tol_turn = tol_Newton;
+            tol = [tol tol_Newton];
+            disp("curve");
             tic
-            curveTracing(A,epsilon,d0,tol_Newton,tol_turn,t,gui);
-            time_mesurment(i,j) = toc;
+            curve_tracing_par(A,epsilon,d0,tol_Newton,tol_turn,t);
+            time_mesurment_curve(i,j) = toc;
             i=i+1;
         end
         j=j+1;
-        A = rand_function(n);
+        
         i=1;
     end
+    disp(time_mesurment_curve);
+    disp(tol);
     % generate a vector for the x axe
-    disp(time_mesurment)
     
 end
 

@@ -1,4 +1,4 @@
-function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_turn,thread,gui)
+function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_turn,thread)
 %input:
 %       A: matrix 
 %       epsilon:
@@ -12,18 +12,17 @@ function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_
     eigen_values = eig(A);
     pred = zeros(numel(eigen_values),1);
     [siz,~] = size(eigen_values);
+    points = cell(1,siz);
     parfor (lambda0=1:siz,thread)
         r = abs(real(lambda0) + imag(lambda0));
-        color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
+        %color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
         
-        drawnow;
-        points(lambda0,:) = Prediction_correction(A,epsilon, eigen_values(lambda0), d0, tol_Newton, tol_turn,color,gui);
-        disp(eigen_values(lambda0));
-    end
+        points{lambda0} = Prediction_correction(A,epsilon, eigen_values(lambda0), d0, tol_Newton, tol_turn);
+        end
     
 end
 
-function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn, color,gui)
+function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn)
 % input : 
 %       - A: matrix
 %       - epsilon: 
@@ -35,21 +34,21 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
 % prendre une valeur propre et appelé curve tracing avec. Puis faure demême avec   
 %
 
-    disp("lambda : ");
-    disp(lambda0);
-    disp("fin");
+    %disp("lambda : ");
+    %disp(lambda0);
+    %disp("fin");
     % Step 0: Compute the first point z1
     theta0 = epsilon;
     %? lambda seul fct ? Non
-    disp(theta0);   
+    %disp(theta0);   
     z1_new = lambda0 + 0.5*theta0 * d0;
     %z1_new = lambda0;
     Id = eye(size(A));   
     [~, s_min, ~] = svds(z1_new .* Id - A, 1, 'smallest'); % g(z_new)
     
     % Newton iteration for the first point
-    disp("g(z_new) computed")
-    k=0.5;
+    %disp("g(z_new) computed")
+    k=1;
 
 
     while abs(s_min - epsilon) / epsilon > tol_Newton
@@ -58,12 +57,14 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
         [u_min, s_min, v_min] = svds(z1_old .* Id - A, 1, 'smallest');
         % compute the next Newton iterate z1_new (equation 2.2)
         theta = (s_min - epsilon)/real(conj(d0) * v_min' * u_min);
-        z1_new = z1_old - tol_Newton*theta * d0; 
-        k=0.5*k;
-       
+        z1_new = z1_old - theta * d0; 
+        k=k+1;
+        if k >= 50 
+           z1_new = z1_old - tol_Newton*theta * d0;
+        end
         %disp(abs(s_min - epsilon) / epsilon);
     end
-    disp("Newton done")
+    %disp("Newton done")
     z1 = z1_new;
     points = z1;
     first_point = z1;
@@ -97,9 +98,7 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
         
         points = [points z_k];
         z1 = z_k;
-        disp(abs(z1-first_point));
-        %scatter(gui,real(z_k), imag(z_k), 'MarkerEdgeColor',color);
-        drawnow;
+        %disp(abs(z1-first_point));
         if abs(z1-first_point)<=tol_turn
             break
         end
@@ -110,5 +109,5 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
         end
         k=k+1;
     end
-    disp("finished");
+    %disp("finished");
 end
