@@ -1,4 +1,4 @@
-function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn,gui)
+function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn, thread,gui)
 %input:
 %       A: matrix 
 %       epsilon:
@@ -6,7 +6,7 @@ function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn,gui)
 %       tol
     m = 2000;
     %[~, s_min, ~] = svd(A);
-    [X, Y, sigmin] = gridPseudospectrum_par(A, epsilon, 16,m);
+    [X, Y, sigmin] = gridPseudospectrum_par(A, epsilon, thread,m);
 
     %s = diag(s_min);
     s = eig(A);
@@ -15,120 +15,14 @@ function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn,gui)
     [~,h] = contourf(gui,X, Y, log10(sigmin), log10([epsilon epsilon]));  % Utilisation de log10 pour un meilleur affichage
     drawnow;
 
-    pred = zeros(numel(s),1);
-    [siz,~] = size(s);
-
-    parfor lambda0=1:siz
-        r = abs(real(lambda0) + imag(lambda0));
-        color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
-        
-        drawnow;
-        points(lambda0,:) = Prediction_correction(A,epsilon, s(lambda0), d0, tol_Newton, tol_turn,color,gui);
-        %pred(i) = scatter(gui,real(points), imag(points), 'filled');
-        %eigen value computed.
-        disp(s(lambda0));
-    end
-    plot(gui,real(s), imag(s),'X', 'MarkerEdgeColor','red');
-    scatter(gui,real(points), imag(points));
+    [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton,tol_turn,thread);
+    plot(gui,real(eigen_values), imag(eigen_values),'X', 'MarkerEdgeColor','red');
+    pred = scatter(gui,real(points), imag(points));
     hold(gui,"off");
     axis(gui,"equal");
     xlabel(gui,'Real part (\lambda)');
     ylabel(gui,'Imaginary part (\lambda)');
     title(gui,'Combined Pseudospectrum Visualization');
     grid(gui,'on');
-    %[~,limit] = size(pred);
-    %for i=1:limit
-    %    pred(i).Visible= false;
-    %end
-    %h.Visible = 'on';
-end
 
-function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn, color,gui)
-% input : 
-%       - A: matrix
-%       - epsilon: 
-%       - K: number of points to be determined
-%       - lambda0: epsilon-pseudoeigenvalue of A. La valeur propre choisie.
-%       - d0: search direction for the first point
-%       - tol: relative accuracy of the first point
-% Explanation :
-% prendre une valeur propre et appelé curve tracing avec. Puis faure demême avec   
-%
-
-    disp("lambda : ");
-    disp(lambda0);
-    disp("fin");
-    % Step 0: Compute the first point z1
-    theta0 = epsilon;
-    %? lambda seul fct ? Non
-    disp(theta0);   
-    z1_new = lambda0 + 0.5*theta0 * d0;
-    %z1_new = lambda0;
-    Id = eye(size(A));   
-    [~, s_min, ~] = svds(z1_new .* Id - A, 1, 'smallest'); % g(z_new)
-    
-    % Newton iteration for the first point
-    disp("g(z_new) computed")
-    k=0.5;
-
-
-    while abs(s_min - epsilon) / epsilon > tol_Newton
-        z1_old = z1_new;
-        % compute the singular triplet for z1_old * I - A
-        [u_min, s_min, v_min] = svds(z1_old .* Id - A, 1, 'smallest');
-        % compute the next Newton iterate z1_new (equation 2.2)
-        theta = (s_min - epsilon)/real(conj(d0) * v_min' * u_min);
-        z1_new = z1_old - tol_Newton*theta * d0; 
-        k=0.5*k;
-       
-        %disp(abs(s_min - epsilon) / epsilon);
-    end
-    disp("Newton done")
-    z1 = z1_new;
-    points = z1;
-    first_point = z1;
-    % computing subsequent points
-    %Il faut partir d'un point initiale et lorsqu'on a finit le tours avec
-    %une certaine tolérence on stop
-    %k=2;
-    k=0;
-    while 1
-        
-        % step 1: Prediction
-        [u_min, ~, v_min] = svds(z1 * Id - A, 1, 'smallest');
-        rk = 1i*v_min' * u_min / abs(v_min' * u_min); % check
-        % determine the steplength tau
-        tau = 0.03; % i fix steplength on 0.1, result must be correct. might change later.
-        zbar_k = z1 + tau * rk; %?
-
-
-        %! Cette partie est peut être la partie qui poserait problème lors
-        %du Newton (essayer d'isoler une composante pour essayer de comprendre le problème)!!!!!!!
-            
-        %Dans le rapport parler des composantes connexe sur le fait qu'on
-        %puisse parler de l'une à l'autre. Il faut que celui qui lit le
-        %rapport le comprenne sans lire les articles.
-
-        % step 2: Correction (via one Newton step)
-        % compute the singular triplet for zbar_k * I - A   
-        [u_min, s_min, v_min] = svds(zbar_k * Id - A, 1, 'smallest');
-        % compute the corrected point z_k (equation 2.3)
-        z_k = zbar_k - (s_min-epsilon)/(u_min' * v_min);
-        
-        points = [points z_k];
-        z1 = z_k;
-        disp(abs(z1-first_point));
-        %scatter(gui,real(z_k), imag(z_k), 'MarkerEdgeColor',color);
-        drawnow;
-        if abs(z1-first_point)<=tol_turn
-            break
-        end
-        if k>1000
-            disp("break");
-            disp(lambda0);
-            break
-        end
-        k=k+1;
-    end
-    disp("finished");
 end

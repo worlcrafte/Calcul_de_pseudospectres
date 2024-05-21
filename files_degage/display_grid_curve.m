@@ -1,26 +1,46 @@
-function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_turn,thread,gui)
+function [h,pred] = display_grid_curve(A,epsilon,d0,tol_Newton, tol_turn, thread,gui)
 %input:
 %       A: matrix 
 %       epsilon:
 %       d0
-%       tol_Newton
-%       tol_turn
-%       thread
-%       gui
+%       tol
+    m = 2000;
+    %[~, s_min, ~] = svd(A);
+    [X, Y, sigmin] = gridPseudospectrum_par(A, epsilon, thread,m);
 
-   
-    eigen_values = eig(A);
-    pred = zeros(numel(eigen_values),1);
-    [siz,~] = size(eigen_values);
-    parfor (lambda0=1:siz,thread)
+    %s = diag(s_min);
+    s = eig(A);
+    %figure();
+    hold(gui,'on');
+    [~,h] = contourf(gui,X, Y, log10(sigmin), log10([epsilon epsilon]));  % Utilisation de log10 pour un meilleur affichage
+    drawnow;
+
+    pred = zeros(numel(s),1);
+    [siz,~] = size(s);
+    %appeler curve tracing plutôt que de la réécrir. 
+    parfor lambda0=1:siz
         r = abs(real(lambda0) + imag(lambda0));
         color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
         
         drawnow;
-        points(lambda0,:) = Prediction_correction(A,epsilon, eigen_values(lambda0), d0, tol_Newton, tol_turn,color,gui);
-        disp(eigen_values(lambda0));
+        points(lambda0,:) = Prediction_correction(A,epsilon, s(lambda0), d0, tol_Newton, tol_turn,color,gui);
+        %pred(i) = scatter(gui,real(points), imag(points), 'filled');
+        %eigen value computed.
+        disp(s(lambda0));
     end
-    
+    plot(gui,real(s), imag(s),'X', 'MarkerEdgeColor','red');
+    scatter(gui,real(points), imag(points));
+    hold(gui,"off");
+    axis(gui,"equal");
+    xlabel(gui,'Real part (\lambda)');
+    ylabel(gui,'Imaginary part (\lambda)');
+    title(gui,'Combined Pseudospectrum Visualization');
+    grid(gui,'on');
+    %[~,limit] = size(pred);
+    %for i=1:limit
+    %    pred(i).Visible= false;
+    %end
+    %h.Visible = 'on';
 end
 
 function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn, color,gui)
