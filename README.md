@@ -2,6 +2,4 @@
 Projet M1 CCA Sorbonne 
 
 description des files : 
-    main -> code 
-    rapport -> code latex du rendu 
-    sujet -> sujet pdf 
+    Le fichier main contient le code principale. 
