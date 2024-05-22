@@ -1,4 +1,5 @@
-function time_mesurment_curve = stress_test(size_from,size_to,step,m_point_to_evaluate,thread_from, thread_to,rand_function,epsilon,gui)
+function [time_mesurment_curve,size_matrix,threads] = stress_test_curve(size_from,size_to,step_size,thread_from, thread_to,step_thread,rand_function,epsilon, ...
+    tol_Newton,tol_turn,step)
 % input : 
 %       - size_from :   size of the matrix at the begining
 %       - size_to   :   size of the matrix at the end of the test
@@ -22,56 +23,33 @@ function time_mesurment_curve = stress_test(size_from,size_to,step,m_point_to_ev
     %generate the matrix 
     A = rand_function(size_from);
     d0=1i;
-    size_matrix = size_from:step:size_to;
+    size_matrix = size_from:step_size:size_to;
     [~,n] = size(size_matrix);
-    time_mesurment = zeros(thread_to-thread_from,n);
     i=1;
     j=1;
     p = gcp('nocreate');
     % delete the previous parpool to create a new one with all possible
     % workers.
-    if ~ isempty(p)
-        delete(p);
+    if isempty(p)
+        parpool();
     end
-    parpool();
-    begining = 1;
-    %if thread_from ~=1
-    %    threads = [1 thread_from:thread_to];
-    %    begining = 2;
-    %else 
-    %    threads =  thread_from:thread_to;
-    %end
+
+    if thread_from ~=1
+        threads = [1 thread_from:step_thread:thread_to];
+    else 
+        threads =  thread_from:step_thread:thread_to;
+    end
+    disp(threads);
     %   time sampling
-    tol = [];
-    threads = [1 2 8 16];
     for n = size_matrix
         A = rand_function(n);
-        [xmin, xmax, ymin, ymax] =  gershgorinRegion_par(A,16,epsilon);
-        x = linspace(xmin, xmax, m_point_to_evaluate);
-        y = linspace(ymin, ymax, m_point_to_evaluate);
-        [X, Y] = meshgrid(x, y);
-        tol_Newton = sqrt(((X(1)-X(2))^2 + (Y(1)-Y(2))^2));
-        while tol_Newton>epsilon
-            A = rand_function(n);
-            [xmin, xmax, ymin, ymax] =  gershgorinRegion_par(A,t,epsilon);
-            x = linspace(xmin, xmax, m_point_to_evaluate);
-            y = linspace(ymin, ymax, m_point_to_evaluate);
-            [X, Y] = meshgrid(x, y);
-            tol_Newton = sqrt(((X(1)-X(2))^2 + (Y(1)-Y(2))^2));
-        end
-        disp(n);
         for t = threads
-            disp(t);
-            %disp("grid");
             %tic
             %[X,Y,~] = gridPseudospectrum_par(A, epsilon,t,m_point_to_evaluate);
             %time_mesurment_grid(i,j) = toc;
-            disp(tol_Newton);
-            tol_turn = tol_Newton;
-            tol = [tol tol_Newton];
-            disp("curve");
+         
             tic
-            curve_tracing_par(A,epsilon,d0,tol_Newton,tol_turn,t);
+            Curve_tracing_m(A,epsilon,d0,tol_Newton,tol_turn,t,step);
             time_mesurment_curve(i,j) = toc;
             i=i+1;
         end
@@ -80,7 +58,6 @@ function time_mesurment_curve = stress_test(size_from,size_to,step,m_point_to_ev
         i=1;
     end
     disp(time_mesurment_curve);
-    disp(tol);
     % generate a vector for the x axe
     
 end
