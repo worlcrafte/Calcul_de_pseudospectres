@@ -25,7 +25,7 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_curve(size_fro
     size_matrix = size_from:step_size:size_to;
     i=1;
     j=1;
-    
+    barre = 1;
     p = gcp('nocreate');
     % delete the previous parpool to create a new one with all possible
     % workers.
@@ -43,7 +43,7 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_curve(size_fro
     f =  waitbar(0,'Compute the data');
     for n = size_matrix
         A = rand_function(n);
-        waitbar(j/length(size_matrix),f,'Compute the data');
+        
         for t = threads
             %tic
             %[X,Y,~] = gridPseudospectrum_par(A, epsilon,t,m_point_to_evaluate);
@@ -53,11 +53,14 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_curve(size_fro
             Curve_tracing_m(A,epsilon,d0,tol_Newton,tol_turn,t,step);
             time_mesurment_curve(i,j) = toc;
             i=i+1;
+            barre = barre+1;
+            waitbar(barre/(length(size_matrix)*length(threads)),f,'Compute the data');
         end
         j=j+1;
         
         i=1;
     end
+    close(f);
     disp(time_mesurment_curve);
     % generate a vector for the x axe
     
