@@ -20,7 +20,7 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
     z1_new = lambda0 + 0.5*theta0 * d0;
     Id = eye(size(A));   
     [~, s_min, ~] = svds(z1_new .* Id - A, 1, 'smallest'); % g(z_new)
-    
+    tau = step;
     k=1;
 
 
