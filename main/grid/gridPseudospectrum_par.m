@@ -1,9 +1,7 @@
 function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
     % A: The matrix for which to analyze the pseudospectrum
-    % epsilon: The perturbation level to adjust the Gershgorin disks
+    % epsilon: The perturbation level 
     % m: The number of points per unit in the grid
-    %[n, ~] = size(A);
-    %m = n*n;
     % use gershgorinRegion_par to determine the region of interest
     [xmin, xmax, ymin, ymax] = gershgorinRegion_par(A,thread, min(epsilon));
     
@@ -24,7 +22,6 @@ function [X,Y,sigmin] = gridPseudospectrum_par(A, epsilon,thread,m)
     end
     % calculate the pseudospectrum in parallel
     ppm = ParforProgressbar(numel(Z),'showWorkerProgress', true);
-    %'showWorkerProgress', true
     e = eye(n);
     parfor (k = 1:numel(Z), thread)
         sigmin(k) = min(svd(Z(k)*e - A));

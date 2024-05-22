@@ -2,9 +2,9 @@ function SpeedUp(mesure,size,num_threads,gui)
 
     speed_up = bsxfun(@rdivide, mesure(1,:), mesure);
 
-    % Tracer les courbes
+    % Draw the plot
     hold(gui,"on");
-    colors = lines(length(speed_up)); % Obtenir des couleurs différentes pour chaque courbe
+    colors = lines(length(speed_up)); % Get various color for each plot
     
     for i = 2:length(num_threads)
         plot(gui,size, speed_up(i,:), 'DisplayName', sprintf('%d threads', num_threads(i)), 'Color', colors(i,:));

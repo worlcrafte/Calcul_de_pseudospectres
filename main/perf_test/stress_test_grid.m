@@ -26,13 +26,12 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_grid(size_from
     i=1;
     j=1;
     barre = 1;
+    %Start the parpool if necessary
     p = gcp('nocreate');
-    % delete the previous parpool to create a new one with all possible
-    % workers.
     if isempty(p)
         parpool();
     end
-
+    % Compute the list of number of cores used
     if thread_from ~=1
         threads = [1 thread_from:step_thread:thread_to];
     else 
@@ -41,13 +40,12 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_grid(size_from
     disp(threads);
     %   time sampling
     f =  waitbar(0,'Compute the data');
+    %For each size of matrix compute the pseudo spectra using the
+    %grid algorithm for each number of core needed
     for n = size_matrix
         A = rand_function(n);
         
         for t = threads
-            %tic
-            %[X,Y,~] = gridPseudospectrum_par(A, epsilon,t,m_point_to_evaluate);
-            %time_mesurment_grid(i,j) = toc;
          
             tic
             grid_perf(A,epsilon,t,m_point_to_evaluate);
@@ -61,7 +59,5 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_grid(size_from
         i=1;
     end
     close(f);
-    disp(time_mesurment_curve);
-    % generate a vector for the x axe
     
 end

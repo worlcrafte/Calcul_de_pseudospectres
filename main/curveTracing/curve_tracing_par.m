@@ -1,13 +1,18 @@
 function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_turn,thread,step)
-%input:
-%       A: matrix 
-%       epsilon:
-%       d0
-%       tol_Newton
-%       tol_turn
-%       thread
-%       gui
-
+% input : 
+%       - A         : The matrix for which to analyze the pseudospectrum 
+%       - epsilon   : The perturbation level 
+%       - d0        : The first point direction
+%       - tol_Newton: Relative accuracy for Newton s method
+%       - tol_turn  : Relative accuracy for stopping criterium
+%       - thread    : Number of cores used
+%       - step      : steplength in prediction correction algorithm
+% output :
+%       - eigen_values   : The eigen values of A
+%       - points         : The "shape" of the peseudo spectra
+% Explanation :
+%          Compute the pseudo spectra with a given matrix.
+%
    
     eigen_values = eig(A);
     %pred = zeros(numel(eigen_values),1);
@@ -16,8 +21,6 @@ function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_
 
     ppm = ParforProgressbar(siz,'showWorkerProgress', true);
     parfor (lambda0=1:siz,thread)
-        %r = abs(real(lambda0) + imag(lambda0));
-        %color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
         
         points{lambda0} = Prediction_correction(A,epsilon, eigen_values(lambda0), d0, tol_Newton, tol_turn,step);
 
@@ -29,14 +32,17 @@ end
 
 function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn,step)
 % input : 
-%       - A: matrix
-%       - epsilon: 
-%       - K: number of points to be determined
-%       - lambda0: epsilon-pseudoeigenvalue of A. La valeur propre choisie.
-%       - d0: search direction for the first point
-%       - tol: relative accuracy of the first point
+%       - A         : The matrix for which to analyze the pseudospectrum 
+%       - epsilon   : The perturbation level 
+%       - lambda0   : epsilon-pseudoeigenvalue of A. The eigen value chosen
+%       - d0        : The first point direction
+%       - tol_Newton: Relative accuracy for Newton s method
+%       - tol_turn  : Relative accuracy for stopping criterium
+%       - step      : steplength in prediction correction algorithm
+% output :
+%       - points    : All the points that have been computed.
 % Explanation :
-% prendre une valeur propre et appelé curve tracing avec. Puis faure demême avec   
+%           For a given eigen value, compute the pseudo spectra.
 %
 
     disp("lambda : ");
@@ -44,10 +50,7 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
     disp("fin");
     % Step 0: Compute the first point z1
     theta0 = epsilon;
-    %? lambda seul fct ? Non
-    %disp(theta0);   
     z1_new = lambda0 + 0.5*theta0 * d0;
-    %z1_new = lambda0;
     Id = eye(size(A));   
     [~, s_min, ~] = svds(z1_new .* Id - A, 1, 'smallest'); % g(z_new)
     
@@ -67,16 +70,12 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
         if k >= 50 
            z1_new = z1_old - tol_Newton*theta * d0;
         end
-        %disp(abs(s_min - epsilon) / epsilon);
     end
     disp("Newton done")
     z1 = z1_new;
     points = z1;
     first_point = z1;
     % computing subsequent points
-    %Il faut partir d'un point initiale et lorsqu'on a finit le tours avec
-    %une certaine tolérence on stop
-    %k=2;
     k=0;
     while 1
         
@@ -84,16 +83,8 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
         [u_min, ~, v_min] = svds(z1 * Id - A, 1, 'smallest');
         rk = 1i*v_min' * u_min / abs(v_min' * u_min); % check
         % determine the steplength tau
-        tau = step; % i fix steplength on 0.1, result must be correct. might change later.
-        zbar_k = z1 + tau * rk; %?
-
-
-        %! Cette partie est peut être la partie qui poserait problème lors
-        %du Newton (essayer d'isoler une composante pour essayer de comprendre le problème)!!!!!!!
-            
-        %Dans le rapport parler des composantes connexe sur le fait qu'on
-        %puisse parler de l'une à l'autre. Il faut que celui qui lit le
-        %rapport le comprenne sans lire les articles.
+        tau = step; 
+        zbar_k = z1 + tau * rk; 
 
         % step 2: Correction (via one Newton step)
         % compute the singular triplet for zbar_k * I - A   
@@ -103,10 +94,11 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
         
         points = [points z_k];
         z1 = z_k;
-        %disp(abs(z1-first_point));
         if abs(z1-first_point)<=tol_turn
             break
         end
+        % If we are between 2 components and the algorithm is stuck, we
+        % stop it.
         if k>1000
             disp("break");
             disp(lambda0);

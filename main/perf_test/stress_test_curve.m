@@ -1,18 +1,18 @@
 function [time_mesurment_curve,size_matrix,threads] = stress_test_curve(size_from,size_to,step_size,thread_from, thread_to,step_thread,rand_function,epsilon, ...
     tol_Newton,tol_turn,step)
 % input : 
-%       - size_from :   size of the matrix at the begining
-%       - size_to   :   size of the matrix at the end of the test
-%       - step      :   step for the size of the matrix 
-%       - m_point_to_evaluate   :   the number of point to evaluate for the
+%       - size_from     :   size of the matrix at the begining
+%       - size_to       :   size of the matrix at the end of the test
+%       - step          :   step for the size of the matrix 
 %       pseudospectra algo
 %       - thread_from   :   number of thread at the begining of the test
 %       - thread_to     :   numbre of thread at the end of the test 
 %       - rand_function :   function used to generate the matrix
-%       - algo_used_for_pseudospectra : function used to compute the
-%       pseudospectra of the matrix
+%       - tol_Newton    : Relative accuracy for Newton s method
+%       - tol_turn      : Relative accuracy for stopping criterium
+%       - step          : steplength in prediction correction algorithm
 
-% output    :    :   
+% output :     
 %       - time_mesurment        :   the time mesured 
 %       - size_matrix           :   list of matrix sizes used
 %       - threads               :   list of number thread used 
@@ -29,29 +29,25 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_curve(size_fro
     i=1;
     j=1;
     barre = 1;
+    %Start the parpool if necessary
     p = gcp('nocreate');
-    % delete the previous parpool to create a new one with all possible
-    % workers.
     if isempty(p)
         parpool();
     end
-
+    % Compute the list of number of cores used
     if thread_from ~=1
         threads = [1 thread_from:step_thread:thread_to];
     else 
         threads =  thread_from:step_thread:thread_to;
     end
-    disp(threads);
     %   time sampling
     f =  waitbar(0,'Compute the data');
+    %For each size of matrix compute the pseudo spectra using tje curve
+    %tracing algorithm for each number of core needed
     for n = size_matrix
         A = rand_function(n);
         
         for t = threads
-            %tic
-            %[X,Y,~] = gridPseudospectrum_par(A, epsilon,t,m_point_to_evaluate);
-            %time_mesurment_grid(i,j) = toc;
-         
             tic
             Curve_tracing_m(A,epsilon,d0,tol_Newton,tol_turn,t,step);
             time_mesurment_curve(i,j) = toc;
@@ -64,8 +60,6 @@ function [time_mesurment_curve,size_matrix,threads] = stress_test_curve(size_fro
         i=1;
     end
     close(f);
-    disp(time_mesurment_curve);
-    % generate a vector for the x axe
     
 end
 
