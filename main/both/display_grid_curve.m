@@ -1,4 +1,4 @@
-function [h,pred] = display_grid_curve(A,epsilon,m,d0,tol_Newton, tol_turn, thread,gui)
+function [h,pred] = display_grid_curve(A,epsilon,m,d0,tol_Newton, tol_turn, thread,step,gui)
 %input:
 %       A: matrix 
 %       epsilon:
@@ -15,7 +15,7 @@ function [h,pred] = display_grid_curve(A,epsilon,m,d0,tol_Newton, tol_turn, thre
     drawnow;
     
     %Compute with curve now 
-    [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton,tol_turn,thread);
+    [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton,tol_turn,thread,step);
     
     %The eigen valu will be red and a X 
     plot(gui,real(eigen_values), imag(eigen_values),'X', 'MarkerEdgeColor','red');

@@ -1,4 +1,4 @@
-function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_turn,thread)
+function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_turn,thread,step)
 %input:
 %       A: matrix 
 %       epsilon:
@@ -13,15 +13,21 @@ function [eigen_values,points] = curve_tracing_par(A,epsilon,d0,tol_Newton, tol_
     %pred = zeros(numel(eigen_values),1);
     [siz,~] = size(eigen_values);
     points = cell(1,siz);
+
+    ppm = ParforProgressbar(siz,'showWorkerProgress', true);
     parfor (lambda0=1:siz,thread)
         %r = abs(real(lambda0) + imag(lambda0));
         %color = [r - floor(r), lambda0/siz, 1-lambda0/siz];
         
-        points{lambda0} = Prediction_correction(A,epsilon, eigen_values(lambda0), d0, tol_Newton, tol_turn);
+        points{lambda0} = Prediction_correction(A,epsilon, eigen_values(lambda0), d0, tol_Newton, tol_turn,step);
+
+        ppm.increment();
     end
+
+    delete(ppm);
 end
 
-function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn)
+function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol_turn,step)
 % input : 
 %       - A: matrix
 %       - epsilon: 
@@ -78,7 +84,7 @@ function points = Prediction_correction(A, epsilon, lambda0, d0, tol_Newton, tol
         [u_min, ~, v_min] = svds(z1 * Id - A, 1, 'smallest');
         rk = 1i*v_min' * u_min / abs(v_min' * u_min); % check
         % determine the steplength tau
-        tau = 0.03; % i fix steplength on 0.1, result must be correct. might change later.
+        tau = step; % i fix steplength on 0.1, result must be correct. might change later.
         zbar_k = z1 + tau * rk; %?
 
 
