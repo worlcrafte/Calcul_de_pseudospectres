@@ -1,7 +1,7 @@
 function Efficienty(mesure,size,num_threads,gui)
     
    
-    speed_up = bsxfun(@rdivide, mesure, mesure(1,:));
+    speed_up = bsxfun(@rdivide, mesure(1,:), mesure);
     % Tracer les courbes
     hold(gui,"on");
     colors = lines(length(speed_up)); % Obtenir des couleurs différentes pour chaque courbe

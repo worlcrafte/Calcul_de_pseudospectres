@@ -1,4 +1,4 @@
-function [eigen_values,points] = Curve_tracing_m(A,epsilon,d0,tol_Newton, tol_turn,thread,step)
+function Curve_tracing_m(A,epsilon,d0,tol_Newton, tol_turn,thread,step)
 %input:
 %       A: matrix 
 %       epsilon:

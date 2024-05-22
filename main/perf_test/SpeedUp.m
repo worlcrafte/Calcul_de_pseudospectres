@@ -1,6 +1,6 @@
 function SpeedUp(mesure,size,num_threads,gui)
 
-    speed_up = bsxfun(@rdivide, mesure, mesure(1,:));
+    speed_up = bsxfun(@rdivide, mesure(1,:), mesure);
 
     % Tracer les courbes
     hold(gui,"on");
